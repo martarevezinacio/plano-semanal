@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#5d6b35">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Plano Semanal">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<title>Plano Semanal Mediterrânico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f3ea; --card:#fffdf8; --ink:#2b2a26; --muted:#77736a; --line:#e6dfcf;
+  --olive:#5d6b35; --olive-soft:#e8ecd9; --terra:#c0623b; --terra-soft:#f6e3d8;
+  --sea:#2f6e7a; --sea-soft:#dcecee; --sun:#d9a43a; --sun-soft:#f7ecd3; --plum:#7a4a6b; --plum-soft:#efe1ea;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;font-size:15px;line-height:1.45}
+header{padding:calc(22px + env(safe-area-inset-top)) 18px 8px;max-width:900px;margin:0 auto}
+h1{font-family:Fraunces,serif;font-weight:700;font-size:26px;margin:0;color:var(--olive);letter-spacing:-.3px}
+.sub{color:var(--muted);font-size:13.5px;margin-top:4px}
+nav{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+nav .wrap{max-width:900px;margin:0 auto;display:flex;gap:4px;padding:8px 12px;overflow-x:auto}
+nav button{flex:1;min-width:max-content;border:0;background:transparent;padding:9px 12px;border-radius:10px;font:600 14px Inter,sans-serif;color:var(--muted);cursor:pointer}
+nav button.on{background:var(--olive);color:#fff}
+main{max-width:900px;margin:0 auto;padding:14px 14px calc(60px + env(safe-area-inset-bottom))}
+.view{display:none}.view.on{display:block}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:9px 13px;border-radius:10px;font:600 13.5px Inter,sans-serif;cursor:pointer}
+.btn.primary{background:var(--terra);border-color:var(--terra);color:#fff}
+.btn.small{padding:6px 9px;font-size:12.5px}
+label.inl{display:flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted)}
+input[type=date],input[type=number],select{font:500 14px Inter,sans-serif;padding:7px 9px;border:1px solid var(--line);border-radius:9px;background:var(--card);color:var(--ink)}
+.days{display:grid;gap:12px}
+@media(min-width:720px){.days{grid-template-columns:1fr 1fr}}
+.day{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+.day h3{font-family:Fraunces,serif;font-weight:500;font-size:18px;margin:0 0 8px;display:flex;justify-content:space-between;align-items:baseline}
+.day h3 span{font-family:Inter;font-size:12.5px;color:var(--muted);font-weight:500}
+.meal{display:flex;gap:10px;align-items:center;padding:9px 0;border-top:1px dashed var(--line)}
+.meal:first-of-type{border-top:0}
+.when{width:56px;flex:none;font-size:11.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:600}
+.mbody{flex:1;min-width:0;cursor:pointer}
+.mname{font-weight:600;font-size:14.5px}
+.mmeta{font-size:12px;color:var(--muted);margin-top:2px}
+.chip{display:inline-block;font-size:11px;font-weight:600;padding:2px 7px;border-radius:20px;margin-right:5px}
+.t-peixe{background:var(--sea-soft);color:var(--sea)}
+.t-branca{background:var(--sun-soft);color:#946a17}
+.t-vermelha{background:var(--terra-soft);color:var(--terra)}
+.t-veg{background:var(--olive-soft);color:var(--olive)}
+.swap{border:1px solid var(--line);background:transparent;border-radius:9px;width:34px;height:34px;cursor:pointer;font-size:16px;color:var(--muted);flex:none}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-bottom:12px}
+.card h2{font-family:Fraunces,serif;font-weight:500;font-size:19px;margin:0 0 8px}
+.summary{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.cat h4{margin:14px 0 6px;font-size:12.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--olive)}
+.item{display:flex;align-items:center;gap:10px;padding:8px 2px;border-bottom:1px solid var(--line);cursor:pointer}
+.item input{width:19px;height:19px;accent-color:var(--olive);flex:none}
+.item .iname{flex:1}
+.item .iq{font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.item.done .iname,.item.done .iq{text-decoration:line-through;color:var(--muted)}
+.rlist .r{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.rlist .r:last-child{border-bottom:0}
+.overlay{position:fixed;inset:0;background:rgba(30,28,22,.45);display:none;align-items:flex-end;justify-content:center;z-index:20}
+.overlay.on{display:flex}
+.sheet{background:var(--card);width:100%;max-width:640px;max-height:90vh;overflow:auto;border-radius:20px 20px 0 0;padding:20px 18px 30px}
+@media(min-width:720px){.overlay{align-items:center}.sheet{border-radius:20px}}
+.sheet h2{font-family:Fraunces,serif;font-weight:700;font-size:22px;margin:6px 0 4px;color:var(--ink)}
+.sheet h5{margin:16px 0 6px;font-size:12.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--olive)}
+.sheet ul{margin:0;padding-left:0;list-style:none}
+.sheet ul li{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--line)}
+.sheet ul li b{white-space:nowrap}
+.sheet ol{margin:0;padding-left:20px}.sheet ol li{margin-bottom:7px}
+.note{background:var(--sun-soft);border-radius:12px;padding:10px 12px;font-size:13.5px;margin-top:12px}
+.close{float:right;border:0;background:var(--bg);width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer}
+.fam-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.fam-row .grow{flex:1}
+.toggle{display:flex;gap:10px;align-items:flex-start;padding:10px 0}
+.toggle input{width:20px;height:20px;accent-color:var(--olive);margin-top:1px}
+.muted{color:var(--muted);font-size:13px}
+.pr li{margin-bottom:6px}
+textarea{width:100%;height:220px;font:13px/1.4 Inter,sans-serif;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:10px;display:none}
+.big{font-family:Fraunces,serif;font-size:34px;font-weight:700;color:var(--terra)}
+.orow{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line)}
+.iq small{font-weight:500;color:var(--muted);font-size:12px}
+.pin{width:72px;padding:4px 6px;font-size:13px;margin-top:3px}
+.iq{text-align:right}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:9px 16px;border-radius:20px;font-size:13.5px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:30}
+.toast.on{opacity:1}
+select.pick{max-width:100%;width:100%;margin-top:6px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Plano Semanal Mediterrânico</h1>
+  <div class="sub">Almoço e jantar, de segunda a domingo · baixo em hidratos · sem glúten · família de <span id="famResumo"></span></div>
+</header>
+<nav><div class="wrap">
+  <button data-v="plano" class="on">Plano</button>
+  <button data-v="compras">Lista de compras</button>
+  <button data-v="receitas">Receitas</button>
+  <button data-v="familia">Família</button>
+</div></nav>
+
+<main>
+  <!-- PLANO -->
+  <section class="view on" id="v-plano">
+    <div class="bar">
+      <label class="inl">Semana de <input type="date" id="inicio"></label>
+      <button class="btn primary" id="gerar">↻ Gerar novo plano</button>
+    </div>
+    <div class="summary" id="resumoTipos"></div>
+    <div class="days" id="dias"></div>
+    <p class="muted" style="margin-top:14px">Toca numa refeição para ver a receita. O botão ⇄ troca por outra receita do mesmo tipo.</p>
+  </section>
+
+  <!-- COMPRAS -->
+  <section class="view" id="v-compras">
+    <div class="bar">
+      <button class="btn primary" id="pdfBtn">PDF para enviar</button>
+      <button class="btn" id="copiar">Copiar lista</button>
+      <button class="btn" id="limparChecks">Desmarcar tudo</button>
+    </div>
+    <div class="card"><h2>Orçamento estimado</h2><div id="orc"></div></div>
+    <div class="card">
+      <h2>Para a semana de <span id="semanaCompras"></span></h2>
+      <div class="bar" style="margin:6px 0 8px"><label class="inl"><input type="checkbox" id="snacksOn" style="accent-color:var(--olive)"> Incluir snacks e lanches</label><button class="btn small" id="editP">Editar preços</button></div>
+      <div class="muted">Quantidades já ajustadas à família e arredondadas para cima. Compras grandes no Lidl; peixe fresco no Mercado de Olhão ou peixaria. Os itens "q.b." costumam existir em casa — confirma a despensa. Sem glúten: confirma o rótulo da carne picada, das especiarias, do tomate pelado e da bebida de aveia (tem de dizer "sem glúten").</div>
+      <textarea id="txtLista" readonly></textarea>
+      <div id="lista"></div>
+    </div>
+  </section>
+
+  <!-- RECEITAS -->
+  <section class="view" id="v-receitas">
+    <div class="card"><h2>Princípios do plano</h2>
+      <ul class="pr muted" style="padding-left:18px;margin:0">
+        <li>Azeite como gordura principal; ervas aromáticas em vez de excesso de sal.</li>
+        <li>Peixe 4–5×/semana, carne branca 3–4×, carne vermelha no máximo 2×, e refeições de ovos ou leguminosas.</li>
+        <li>Metade do prato em legumes; sem arroz, massa ou batata para os adultos.</li>
+        <li><b>Sem glúten:</b> nenhuma receita leva trigo, centeio, cevada, pão, pão ralado, farinha ou molhos industriais. As almôndegas e os hambúrgueres ligam só com ovo e queijo.</li>
+        <li><b>Sem carne de porco</b> e <b>sem leite de vaca</b>: onde era preciso leite usa-se bebida de aveia. Tem de ser <b>sem glúten certificada</b>, porque a aveia comum costuma estar contaminada com trigo.</li>
+        <li>Ler sempre o rótulo da carne picada já preparada, das misturas de especiarias, do tomate pelado temperado e dos iogurtes com sabor, porque podem ter glúten escondido. No vinagre, preferir o de vinho.</li>
+        <li>Fruta da época como sobremesa ao almoço e ao jantar (indicada em cada refeição); água às refeições.</li>
+        <li>Snacks sem glúten na lista de compras: bebida de aveia sem glúten, iogurte natural, frutos secos, queijo fresco, húmus com palitos de cenoura, tostas de arroz/milho e fruta.</li>
+      </ul>
+    </div>
+    <div class="card"><h2>Todas as receitas</h2><div class="rlist" id="todas"></div></div>
+  </section>
+
+  <!-- FAMÍLIA -->
+  <section class="view" id="v-familia">
+    <div class="card">
+      <h2>Quem come em casa</h2>
+      <div class="fam-row"><div class="grow">Adultos</div><input type="number" id="adultos" min="0" max="10" style="width:70px"></div>
+      <div id="criancas"></div>
+      <div class="bar" style="margin-top:10px"><button class="btn small" id="addCrianca">+ Adicionar criança</button></div>
+      <div class="muted" id="porcoes"></div>
+    </div>
+    <div class="card">
+      <h2>Hidratos para as crianças</h2>
+      <label class="toggle"><input type="checkbox" id="sideKids">
+        <span>Juntar uma pequena porção de hidratos complexos às crianças (arroz integral, batata-doce, quinoa, massa sem glúten…), rodando ao longo da semana.<br><span class="muted">As crianças em crescimento precisam de mais hidratos do que os adultos; a refeição base continua igual para todos.</span></span>
+      </label>
+    </div>
+  </section>
+</main>
+
+<div class="overlay" id="ov"><div class="sheet" id="sheet"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- Dados ---------- */
+const CATS = {fruta:"Fruta da época (sobremesa)",peixe:"Peixe e marisco",carne:"Talho",lact:"Ovos, queijos e bebidas vegetais",leg:"Legumes e hortícolas",cer:"Cereais e leguminosas",desp:"Mercearia",ervas:"Ervas e especiarias",snack:"Snacks e lanches (fora do plano)"};
+const CAT_OF = {
+ "Lombos de salmão":"peixe","Bacalhau demolhado (postas)":"peixe","Dourada inteira, amanhada":"peixe","Filetes de pescada":"peixe","Tamboril ou peixe branco firme":"peixe","Camarão descascado":"peixe","Robalo inteiro, amanhado":"peixe","Polvo":"peixe",
+ "Coxas de frango":"carne","Bifes de peru":"carne","Peito de frango":"carne","Carne picada de peru":"carne","Carne picada de novilho":"carne","Carne de novilho para estufar":"carne","Cenoura":"leg",
+ "Ovos":"lact","Bebida de aveia sem glúten":"lact","Iogurte grego natural":"lact","Queijo feta":"lact","Queijo mozzarella":"lact","Queijo parmesão ralado":"lact",
+ "Limão":"fruta",
+ "Lentilhas secas":"cer","Grão-de-bico cozido":"cer","Arroz integral":"cer","Massa sem glúten":"cer","Quinoa":"cer","Milho em grão":"desp",
+ "Azeite":"desp","Azeitonas pretas":"desp","Tomate pelado":"desp","Vinho branco":"desp",
+ "Endro ou salsa":"ervas","Salsa":"ervas","Coentros":"ervas","Orégãos":"ervas","Louro":"ervas","Alecrim":"ervas","Noz-moscada":"ervas","Hortelã":"ervas","Manjericão":"ervas","Tomilho":"ervas","Pimentão-doce":"ervas","Cominhos":"ervas"
+};
+const TIPOS = {peixe:"Peixe",branca:"Carne branca",vermelha:"Carne vermelha",veg:"Ovos/leguminosas"};
+const ALVO = {peixe:5,branca:4,vermelha:2,veg:3};
+
+// Quantidades por 1 porção de adulto. q=0 → "q.b."
+const R = [
+{id:"salmao",n:"Salmão no forno com espargos e limão",t:"peixe",min:25,i:[["Lombos de salmão",150,"g"],["Espargos verdes",120,"g"],["Limão",.25,"un"],["Alho",1,"dente"],["Azeite",10,"ml"],["Endro ou salsa",0]],
+ p:["Pré-aquecer o forno a 200 °C.","Dispor os espargos (sem a parte dura do pé) num tabuleiro, regar com metade do azeite e temperar com sal e pimenta.","Colocar o salmão por cima, com o alho picado, rodelas de limão e o resto do azeite.","Levar ao forno 15–18 minutos.","Finalizar com endro fresco e um fio de sumo de limão."]},
+{id:"bacalhau",n:"Bacalhau no forno com grelos e azeitonas",t:"peixe",min:35,i:[["Bacalhau demolhado (postas)",160,"g"],["Grelos",150,"g"],["Cebola",.25,"un"],["Alho",2,"dente"],["Azeitonas pretas",15,"g"],["Azeite",15,"ml"]],
+ p:["Pré-aquecer o forno a 200 °C.","Num tabuleiro, fazer uma cama de cebola às rodelas e alho laminado com metade do azeite.","Colocar as postas por cima, regar com o restante azeite e levar ao forno 20–25 minutos.","Entretanto, cozer os grelos 4–5 minutos em água a ferver com sal, escorrer e saltear com um dente de alho.","Servir com as azeitonas e regar com o molho do tabuleiro."],nota:"Lembra-te de demolhar o bacalhau 24–48 h antes, mudando a água várias vezes (ou compra já demolhado)."},
+{id:"dourada",n:"Dourada grelhada com salada de tomate e pepino",t:"peixe",min:25,i:[["Dourada inteira, amanhada",300,"g"],["Tomate",120,"g"],["Pepino",80,"g"],["Cebola roxa",.15,"un"],["Limão",.25,"un"],["Azeite",10,"ml"],["Orégãos",0]],
+ p:["Temperar a dourada com sal grosso e deixar repousar 10 minutos.","Grelhar (ou levar ao forno a 220 °C) cerca de 8 minutos de cada lado.","Cortar o tomate, o pepino e a cebola roxa; temperar com azeite, orégãos, sal e um pouco de limão.","Servir o peixe com a salada e gomos de limão."]},
+{id:"pescada",n:"Pescada com curgete e pimentos salteados",t:"peixe",min:20,i:[["Filetes de pescada",160,"g"],["Curgete",120,"g"],["Pimento vermelho",.5,"un"],["Cebola",.25,"un"],["Alho",1,"dente"],["Limão",.25,"un"],["Azeite",10,"ml"],["Salsa",0]],
+ p:["Temperar os filetes com sal, pimenta e sumo de limão.","Saltear a cebola e o alho em metade do azeite; juntar o pimento em tiras e a curgete em meias-luas e cozinhar 6–8 minutos (devem ficar estaladiços).","Numa frigideira à parte, cozinhar os filetes no restante azeite, 3 minutos de cada lado.","Servir sobre os legumes e polvilhar com salsa."]},
+{id:"caldeirada",n:"Caldeirada leve de peixe",t:"peixe",min:40,i:[["Tamboril ou peixe branco firme",170,"g"],["Tomate pelado",100,"g"],["Pimento verde",.3,"un"],["Cebola",.5,"un"],["Alho",2,"dente"],["Vinho branco",20,"ml"],["Azeite",15,"ml"],["Louro",0],["Coentros",0]],
+ p:["Num tacho largo, fazer camadas de cebola às rodelas, alho, pimento e tomate pelado.","Juntar o louro, o azeite e o vinho; tapar e cozinhar 15 minutos em lume brando.","Acrescentar o peixe em pedaços temperado com sal, sacudir o tacho (sem mexer) e cozinhar mais 10–12 minutos.","Servir com coentros picados."]},
+{id:"camarao",n:"Camarão ao alho com esparguete de curgete",t:"peixe",min:20,i:[["Camarão descascado",150,"g"],["Curgete",200,"g"],["Tomate cherry",60,"g"],["Alho",2,"dente"],["Limão",.25,"un"],["Azeite",10,"ml"],["Salsa",0]],
+ p:["Cortar a curgete em esparguete (espiralizador ou descascador de juliana).","Aquecer o azeite com o alho laminado; juntar o camarão e cozinhar 2–3 minutos até ficar rosado. Reservar.","Na mesma frigideira, saltear a curgete e os tomates cherry cortados ao meio durante 2–3 minutos.","Juntar o camarão, sumo de limão e salsa. Servir de imediato."],nota:"Malagueta opcional, só no prato dos adultos."},
+{id:"robalo",n:"Robalo no forno com funcho e tomate cherry",t:"peixe",min:35,i:[["Robalo inteiro, amanhado",300,"g"],["Funcho",.5,"un"],["Tomate cherry",100,"g"],["Azeitonas pretas",10,"g"],["Limão",.25,"un"],["Azeite",10,"ml"],["Tomilho",0]],
+ p:["Pré-aquecer o forno a 200 °C.","Laminar o funcho e espalhar no tabuleiro com os tomates cherry e as azeitonas.","Rechear o robalo com rodelas de limão e tomilho, temperar com sal e colocar por cima.","Regar com azeite e assar 25 minutos."]},
+{id:"polvo",n:"Polvo à lagareiro com brócolos",t:"peixe",min:60,i:[["Polvo",220,"g"],["Brócolos",150,"g"],["Alho",3,"dente"],["Azeite",20,"ml"],["Coentros",0]],
+ p:["Cozer o polvo (descongelado) em água sem sal, com uma cebola, 40–50 minutos , até estar macio.","Escorrer, colocar num tabuleiro e levar ao forno a 220 °C durante 10 minutos.","Cozer os brócolos a vapor 5 minutos.","Aquecer o azeite com o alho laminado, sem deixar queimar, e regar o polvo e os brócolos. Finalizar com coentros."],nota:"O polvo pode ser cozido no dia anterior para poupar tempo."},
+
+{id:"frango",n:"Frango assado com limão, alecrim e abóbora",t:"branca",min:55,i:[["Coxas de frango",220,"g"],["Abóbora",120,"g"],["Cebola",.5,"un"],["Alho",2,"dente"],["Limão",.25,"un"],["Azeite",10,"ml"],["Alecrim",0]],
+ p:["Temperar o frango com alho esmagado, sumo de limão, alecrim, sal e pimenta (idealmente 30 min antes).","Num tabuleiro, juntar a abóbora em cubos e a cebola em quartos; colocar o frango por cima e regar com azeite.","Assar a 200 °C durante 40–45 minutos, virando a meio, até a pele ficar dourada."]},
+{id:"peru",n:"Bifes de peru com puré de couve-flor",t:"branca",min:30,i:[["Bifes de peru",150,"g"],["Couve-flor",200,"g"],["Bebida de aveia sem glúten",30,"ml"],["Alho",1,"dente"],["Alface",40,"g"],["Azeite",10,"ml"],["Noz-moscada",0]],
+ p:["Cozer a couve-flor em floretes 10–12 minutos; escorrer bem.","Triturar com a bebida de aveia, metade do azeite, sal e uma pitada de noz-moscada até ficar cremoso.","Temperar os bifes com alho e grelhá-los 3–4 minutos de cada lado.","Servir com o puré e uma salada verde."]},
+{id:"espetadas",n:"Espetadas de frango com tzatziki e salada",t:"branca",min:30,i:[["Peito de frango",150,"g"],["Pimento vermelho",.5,"un"],["Cebola roxa",.25,"un"],["Iogurte grego natural",60,"g"],["Pepino",60,"g"],["Alface",50,"g"],["Alho",1,"dente"],["Azeite",10,"ml"],["Hortelã",0]],
+ p:["Cortar o frango em cubos e temperar com azeite, alho, sal e pimentão-doce (opcional).","Montar as espetadas alternando frango, pimento e cebola.","Grelhar ou assar a 220 °C cerca de 15 minutos, virando.","Tzatziki: ralar o pepino, espremer a água, e misturar com o iogurte, hortelã picada, sal e um fio de azeite.","Servir com a salada."]},
+{id:"almondegas",n:"Almôndegas de peru com molho de tomate e curgete",t:"branca",min:40,i:[["Carne picada de peru",140,"g"],["Ovos",.25,"un"],["Queijo parmesão ralado",10,"g"],["Tomate pelado",120,"g"],["Curgete",150,"g"],["Cebola",.25,"un"],["Alho",1,"dente"],["Azeite",10,"ml"],["Manjericão",0]],
+ p:["Misturar a carne com o ovo, o parmesão, sal e pimenta; formar bolinhas.","Alourar as almôndegas em metade do azeite e reservar.","Na mesma panela, refogar a cebola e o alho; juntar o tomate pelado e cozinhar 10 minutos.","Voltar a juntar as almôndegas e cozinhar mais 10 minutos em lume brando.","Saltear a curgete em rodelas no restante azeite e servir com as almôndegas e manjericão."]},
+{id:"frangocog",n:"Frango estufado com cogumelos e espinafres",t:"branca",min:30,i:[["Peito de frango",150,"g"],["Cogumelos frescos",100,"g"],["Espinafres frescos",80,"g"],["Cebola",.25,"un"],["Alho",1,"dente"],["Iogurte grego natural",40,"g"],["Azeite",10,"ml"],["Tomilho",0]],
+ p:["Cortar o frango em tiras e alourar no azeite; reservar.","Refogar a cebola e o alho, juntar os cogumelos laminados e cozinhar até perderem a água.","Voltar a juntar o frango e o tomilho, com um pouco de água, e cozinhar 8 minutos.","Juntar os espinafres até murcharem. Desligar o lume e envolver o iogurte para dar cremosidade."]},
+
+{id:"hamburguer",n:"Hambúrguer caseiro de novilho com legumes grelhados",t:"vermelha",min:30,i:[["Carne picada de novilho",140,"g"],["Cebola",.25,"un"],["Beringela",.33,"un"],["Curgete",80,"g"],["Tomate",80,"g"],["Alface",40,"g"],["Azeite",10,"ml"],["Orégãos",0]],
+ nota:"Sem glúten: compra a carne picada na hora ao balcão do talho ou confirma o rótulo — os hambúrgueres já feitos costumam levar farinha ou pão ralado.",p:["Misturar a carne com a cebola finamente picada, sal, pimenta e orégãos; moldar os hambúrgueres.","Cortar a beringela e a curgete em fatias, pincelar com azeite e grelhar 3 minutos de cada lado.","Grelhar os hambúrgueres 4–5 minutos de cada lado.","Servir no prato (sem pão) com os legumes, alface e tomate."]},
+{id:"novilho",n:"Estufado de novilho com cogumelos e cenoura",t:"vermelha",min:75,i:[["Carne de novilho para estufar",150,"g"],["Cogumelos frescos",60,"g"],["Cenoura",60,"g"],["Cebola",.25,"un"],["Alho",2,"dente"],["Tomate pelado",80,"g"],["Vinho branco",20,"ml"],["Azeite",10,"ml"],["Louro",0],["Salsa",0]],
+ p:["Cortar a carne em cubos e temperar com sal, pimenta e alho.","Num tacho, refogar a cebola no azeite, juntar a carne e alourar de todos os lados.","Juntar o vinho, o tomate pelado, o louro e um pouco de água; tapar e cozinhar 45 minutos em lume brando.","Acrescentar a cenoura às rodelas e os cogumelos laminados e cozinhar mais 15–20 minutos, até a carne estar macia.","Servir com salsa picada e uma salada verde."]},
+{id:"beringelas",n:"Beringelas recheadas com carne e mozzarella",t:"vermelha",min:50,i:[["Beringela",.5,"un"],["Carne picada de novilho",100,"g"],["Tomate pelado",80,"g"],["Cebola",.25,"un"],["Alho",1,"dente"],["Queijo mozzarella",25,"g"],["Azeite",10,"ml"],["Orégãos",0]],
+ p:["Cortar as beringelas ao meio no sentido do comprimento, fazer golpes na polpa, pincelar com azeite e assar a 200 °C durante 20 minutos.","Retirar a polpa com uma colher e picar.","Refogar a cebola e o alho, juntar a carne, depois a polpa da beringela e o tomate pelado; cozinhar 10 minutos.","Rechear as beringelas, cobrir com mozzarella e orégãos e gratinar 10 minutos."]},
+
+{id:"tortilha",n:"Tortilha de espinafres e feta com salada",t:"veg",min:25,i:[["Ovos",2,"un"],["Espinafres frescos",60,"g"],["Cebola",.25,"un"],["Pimento vermelho",.25,"un"],["Queijo feta",25,"g"],["Alface",50,"g"],["Tomate",60,"g"],["Azeite",10,"ml"]],
+ p:["Refogar a cebola e o pimento numa frigideira antiaderente com azeite; juntar os espinafres até murcharem.","Bater os ovos com sal e pimenta, juntar o feta esfarelado e verter sobre os legumes.","Cozinhar em lume brando, tapado, 8–10 minutos; virar com a ajuda de um prato ou terminar no forno.","Servir com salada de alface e tomate."]},
+{id:"shakshuka",n:"Shakshuka (ovos em molho de tomate e pimentos)",t:"veg",min:30,i:[["Ovos",2,"un"],["Tomate pelado",150,"g"],["Pimento vermelho",.5,"un"],["Cebola",.25,"un"],["Alho",1,"dente"],["Azeite",10,"ml"],["Cominhos",0],["Pimentão-doce",0],["Coentros",0]],
+ p:["Refogar a cebola, o alho e o pimento em tiras no azeite durante 8 minutos.","Juntar os cominhos, o pimentão-doce e o tomate pelado; cozinhar 10 minutos até engrossar.","Abrir covas no molho e partir lá os ovos; tapar e cozinhar 6–8 minutos (clara firme).","Polvilhar com coentros e servir na frigideira."]},
+{id:"lentilhas",n:"Salada morna de lentilhas, legumes assados e feta",t:"veg",min:40,semSide:true,i:[["Lentilhas secas",50,"g"],["Beringela",.25,"un"],["Pimento vermelho",.5,"un"],["Cebola roxa",.25,"un"],["Queijo feta",30,"g"],["Rúcula",30,"g"],["Limão",.25,"un"],["Azeite",15,"ml"]],
+ p:["Cozer as lentilhas em água sem sal 18–20 minutos (devem ficar inteiras); escorrer.","Assar a beringela, o pimento e a cebola em cubos com metade do azeite, a 200 °C durante 25 minutos.","Misturar as lentilhas mornas com os legumes, a rúcula e o feta.","Temperar com o restante azeite, sumo de limão, sal e pimenta."]},
+{id:"grao",n:"Grão com espinafres, ovo escalfado e pimentão",t:"veg",min:25,semSide:true,i:[["Grão-de-bico cozido",100,"g"],["Espinafres frescos",100,"g"],["Ovos",1,"un"],["Cebola",.25,"un"],["Alho",2,"dente"],["Azeite",10,"ml"],["Pimentão-doce",0],["Cominhos",0]],
+ p:["Refogar a cebola e o alho no azeite; juntar o pimentão-doce e os cominhos.","Acrescentar o grão escorrido e um pouco de água; cozinhar 5 minutos.","Juntar os espinafres e deixar murchar.","Escalfar os ovos (3–4 minutos em água a fervilhar com um fio de vinagre de vinho) e servir por cima."]}
+];
+const SIDES = [
+ {n:"Arroz integral",q:45,u:"g",d:"arroz integral (45 g cru por criança)"},
+ {n:"Batata-doce",q:150,u:"g",d:"batata-doce assada ou cozida (150 g por criança)"},
+ {n:"Massa sem glúten",q:50,u:"g",d:"massa sem glúten — de milho/arroz ou de leguminosas (50 g crua por criança)"},
+ {n:"Quinoa",q:40,u:"g",d:"quinoa (40 g crua por criança)"},
+ {n:"Batata",q:150,u:"g",d:"batata cozida ou assada (150 g por criança)"},
+ {n:"Milho em grão",q:60,u:"g",d:"milho doce em grão (60 g por criança), salteado ou na salada"}
+];
+CAT_OF["Batata-doce"]="leg"; CAT_OF["Batata"]="leg";
+// Dicas com os equipamentos da casa (air fryer, Bimby, micro-ondas)
+const EQUIP = {
+ salmao:"Air fryer: salmão a 180 °C durante 12–14 minutos; os espargos podem ir juntos nos últimos 8 minutos.",
+ bacalhau:"Bimby: cozer os grelos na Varoma (12 min/Varoma/vel. 1) enquanto o bacalhau está no forno.",
+ dourada:"Air fryer: se a dourada couber, 190 °C durante 15–18 minutos, virando a meio.",
+ pescada:"Bimby: os filetes podem ir na Varoma com rodelas de limão (15 min/Varoma/vel. 1) — fica mais leve.",
+ camarao:"Sem espiralizador? Corta a curgete em fitas finas com o descascador de legumes.",
+ polvo:"Panela normal: 40–50 minutos. Para os brócolos, 3–4 minutos no micro-ondas numa taça tapada com um pouco de água também resulta.",
+ frango:"Air fryer: coxas a 190 °C durante 25–30 minutos, virando a meio; a abóbora em cubos assa em 15–18 minutos.",
+ peru:"Bimby: cozer a couve-flor na Varoma (20 min/Varoma/vel. 1) e depois triturar com a bebida de aveia e o azeite (30 s/vel. 5).",
+ espetadas:"Air fryer: espetadas a 200 °C durante 12–15 minutos, virando a meio. Usa espetos que caibam no cesto.",
+ almondegas:"Air fryer: em vez de alourar na frigideira, 190 °C durante 10–12 minutos; depois juntar ao molho.",
+ frangocog:"Bimby: refogar cebola e alho (3 min/120 °C/vel. 1), juntar frango e cogumelos e cozinhar 15 min/100 °C/colher inversa/vel. colher; espinafres nos últimos 3 min.",
+ hamburguer:"Air fryer: hambúrgueres a 190 °C durante 10–12 minutos; os legumes em fatias a 200 °C durante 10 minutos.",
+ novilho:"Bimby: refogar cebola e alho (3 min/120 °C/vel. 1), juntar a carne e os restantes ingredientes e cozinhar 60 min/98 °C/colher inversa/vel. colher (cenoura e cogumelos nos últimos 20 min).",
+ beringelas:"Air fryer: assar as meias beringelas a 180 °C durante 15 minutos antes de rechear, e gratinar 5 minutos no fim.",
+ tortilha:"Também fica bem no forno: verter numa forma untada e levar a 180 °C durante 15–18 minutos.",
+ shakshuka:"Bimby: o molho de tomate e pimentos pode ser feito na Bimby (refogar 5 min/120 °C/vel. 1 + 12 min/100 °C/vel. 1) e depois passado para a frigideira para os ovos.",
+ lentilhas:"Air fryer: legumes em cubos a 190 °C durante 15–18 minutos. Bimby: lentilhas no cesto, cobertas de água, 20 min/100 °C/vel. 1.",
+ grao:"Micro-ondas: escalfar cada ovo numa chávena com água, tapado, 50–60 s na potência máxima."
+};
+const STORE = {peixe:"Mercado de Olhão / peixaria (ou Lidl, congelado)",fruta:"Lidl ou Mercado de Olhão"};
+// Preços de referência (estimativa Lidl/Algarve, nov. 2026). g → €/kg · ml → €/L · un/dente/pacote → €/unidade
+const PRICE = {
+ "Lombos de salmão":17,"Bacalhau demolhado (postas)":15,"Dourada inteira, amanhada":8.5,"Filetes de pescada":9,"Tamboril ou peixe branco firme":13,"Camarão descascado":13,"Robalo inteiro, amanhado":9,"Polvo":14,
+ "Coxas de frango":3.5,"Bifes de peru":8,"Peito de frango":7,"Carne picada de peru":7.5,"Carne picada de novilho":9.5,"Carne de novilho para estufar":11,"Cenoura":1,
+ "Ovos":0.25,"Bebida de aveia sem glúten":1.9,"Iogurte grego natural":4,"Queijo feta":11,"Queijo mozzarella":7,"Queijo parmesão ralado":18,
+ "Limão":0.3,"Lentilhas secas":2.5,"Grão-de-bico cozido":2,"Arroz integral":1.8,"Massa sem glúten":4,"Quinoa":7,"Milho em grão":3.5,"Batata-doce":1.8,"Batata":1.3,
+ "Azeite":7.5,"Azeitonas pretas":6,"Tomate pelado":1.6,"Vinho branco":3,
+ "Espargos verdes":10,"Grelos":3,"Cebola":0.2,"Cebola roxa":0.3,"Alho":0.05,"Tomate":2.2,"Pepino":1.8,"Curgete":2.2,"Pimento vermelho":0.7,"Pimento verde":0.5,"Tomate cherry":4.5,"Funcho":1.2,"Brócolos":2.8,"Abóbora":1.5,"Couve-flor":2.5,"Alface":2,"Cogumelos frescos":5,"Espinafres frescos":7,"Beringela":0.7,"Couve lombarda":1.8,"Rúcula":9,
+ "Iogurtes naturais sem açúcar":0.25,"Frutos secos sem sal (nozes, amêndoas)":14,"Queijo fresco":1.3,"Tostas ou bolachas de arroz/milho sem glúten":1.6,"Pão sem glúten":3.2,"Cenoura (para palitos)":1,"Húmus":1.5,"Fruta para lanches (banana, maçã)":1.6,"Chocolate negro 70%":1.6,"Bebida de aveia sem glúten (lanches)":1.9
+};
+// Fruta da época: g = porção por pessoa, pw = peso de uma peça, p = €/kg, m = meses
+const FRUTA = [
+ {n:"Laranja",g:200,pw:200,p:1.3,m:[11,12,1,2,3,4,5]},
+ {n:"Tangerina",g:160,pw:80,p:2,m:[11,12,1,2]},
+ {n:"Maçã",g:170,pw:170,p:1.8,m:[1,2,3,4,5,8,9,10,11,12]},
+ {n:"Pera rocha",g:170,pw:170,p:1.9,m:[8,9,10,11,12,1,2,3]},
+ {n:"Kiwi",g:100,pw:100,p:4,m:[11,12,1,2,3,4]},
+ {n:"Dióspiro",g:200,pw:200,p:2.5,m:[10,11,12]},
+ {n:"Romã",g:175,pw:350,p:3,m:[10,11,12]},
+ {n:"Banana",g:150,pw:150,p:1.4,m:[1,2,3,4,5,6,7,8,9,10,11,12]},
+ {n:"Morangos",g:150,p:4.5,m:[3,4,5,6]},
+ {n:"Nêsperas",g:150,p:3.5,m:[4,5]},
+ {n:"Cerejas",g:150,p:7,m:[5,6]},
+ {n:"Pêssego",g:170,pw:170,p:2.5,m:[6,7,8,9]},
+ {n:"Ameixa",g:150,pw:60,p:2.8,m:[6,7,8,9]},
+ {n:"Melancia",g:300,p:0.9,m:[6,7,8,9]},
+ {n:"Melão",g:250,p:1.6,m:[6,7,8,9]},
+ {n:"Figos",g:150,pw:50,p:5,m:[8,9]},
+ {n:"Uvas",g:150,p:3,m:[8,9,10]}
+];
+FRUTA.forEach(f=>{PRICE[f.n]=f.p;CAT_OF[f.n]="fruta"});
+// Snacks semanais para 4 pessoas (escalam com o nº de pessoas) — não entram no plano
+const SNACKS = [
+ ["Iogurtes naturais sem açúcar",14,"un"],["Frutos secos sem sal (nozes, amêndoas)",300,"g"],["Queijo fresco",2,"un"],
+ ["Tostas ou bolachas de arroz/milho sem glúten",2,"pacote"],["Pão sem glúten",1,"pacote"],["Cenoura (para palitos)",1000,"g"],
+ ["Húmus",2,"un"],["Fruta para lanches (banana, maçã)",1500,"g"],["Chocolate negro 70%",1,"un"],["Bebida de aveia sem glúten (lanches)",3000,"ml"]
+];
+const ERVAS_EUR = 3; // reposição de ervas, especiarias e sal
+const DIAS = ["Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"];
+const byId = Object.fromEntries(R.map(r=>[r.id,r]));
+
+/* ---------- Estado ---------- */
+const KEY="planoMed_v2";
+let S = load() || {fam:{adultos:2,criancas:[8,12]},sideKids:true,start:nextMonday(),plan:null,checks:{}};
+if(!S.plan) S.plan = gerarPlano();
+S.plan.forEach(x=>{if(!byId[x.r]){const usados=new Set(S.plan.map(y=>y.r));x.r=(R.find(r=>r.t==="vermelha"&&!usados.has(r.id))||R.find(r=>!usados.has(r.id))).id}});
+if(S.snacks===undefined) S.snacks=true; if(S.fruitOff===undefined) S.fruitOff=0; S.precos=S.precos||{};
+function load(){try{return JSON.parse(localStorage.getItem(KEY))}catch(e){return null}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+function nextMonday(){const d=new Date();d.setDate(d.getDate()+((8-d.getDay())%7));return iso(d)}
+function iso(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function dayDate(i){const [y,m,d]=S.start.split("-").map(Number);const dt=new Date(y,m-1,d+i);return dt.toLocaleDateString("pt-PT",{day:"numeric",month:"short"})}
+
+function fatorCrianca(idade){return idade<4?.4:idade<=8?.6:idade<=12?.8:1}
+function porcoes(){return S.fam.adultos + S.fam.criancas.reduce((a,c)=>a+fatorCrianca(c),0)}
+
+function frutasMes(){const m=+S.start.split("-")[1];return FRUTA.filter(f=>f.m.includes(m))}
+function frutaDo(i){const L=frutasMes();return L[(i+S.fruitOff)%L.length]}
+function roundQ(q,u){if(u==="g"||u==="ml")return q<100?Math.ceil(q/10)*10:Math.ceil(q/50)*50;if(u==="un")return Math.ceil(q-0.05);if(u==="qb")return 0;return Math.ceil(q)}
+function preco(n){return S.precos[n]!=null?S.precos[n]:PRICE[n]}
+function custo(n,q,u){const p=preco(n);if(p==null||u==="qb")return 0;const r=roundQ(q,u);return (u==="g"||u==="ml")?r/1000*p:r*p}
+function eur(v){return v.toFixed(2).replace(".",",")+" €"}
+function base(u){return u==="g"?"€/kg":u==="ml"?"€/L":"€/"+(u==="dente"?"dente":u==="pacote"?"pacote":"un")}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function gerarPlano(){
+  let tipos=[];for(const t in ALVO)for(let k=0;k<ALVO[t];k++)tipos.push(t);
+  for(let tries=0;tries<500;tries++){shuffle(tipos);if(tipos.every((t,i)=>i===0||t!==tipos[i-1]))break}
+  const usados=new Set(), off=Math.floor(Math.random()*SIDES.length);
+  return tipos.map((t,i)=>{const pool=shuffle(R.filter(r=>r.t===t&&!usados.has(r.id)));const r=pool[0];usados.add(r.id);return {r:r.id,side:(off+i)%SIDES.length}});
+}
+function trocar(i){
+  const atual=byId[S.plan[i].r], usados=new Set(S.plan.map(s=>s.r));
+  let pool=R.filter(r=>r.t===atual.t&&!usados.has(r.id));
+  if(!pool.length) pool=R.filter(r=>!usados.has(r.id));
+  if(!pool.length){toast("Não há mais receitas disponíveis");return}
+  S.plan[i].r=shuffle(pool)[0].id; S.checks={}; save(); renderAll();
+}
+
+/* ---------- Formatação ---------- */
+function fmtQ(q,u){
+  if(u==="g"||u==="ml"){
+    let v=q<100?Math.ceil(q/10)*10:Math.ceil(q/50)*50;
+    if(v>=1000) return (Math.round(v/100)/10).toString().replace(".",",")+(u==="g"?" kg":" L");
+    return v+" "+u;
+  }
+  if(u==="dente"){const v=Math.ceil(q);return v+(v===1?" dente":" dentes")+(v>=8?" (≈"+Math.ceil(v/10)+" cabeça"+(Math.ceil(v/10)>1?"s":"")+")":"")}
+  if(u==="pacote"){const v=Math.ceil(q);return v+(v===1?" pacote":" pacotes")}
+  if(u==="fatia"){const v=Math.ceil(q);return v+(v===1?" fatia":" fatias")}
+  if(u==="un"){const v=Math.ceil(q-0.05);return v+" un"}
+  return "q.b.";
+}
+function fmtRecipe(q,u){ // na receita: precisão maior
+  if(!q) return "q.b.";
+  if(u==="g"||u==="ml"){const v=Math.round(q/5)*5;return (v>=1000?(v/1000).toFixed(1).replace(".",",")+(u==="g"?" kg":" L"):v+" "+u)}
+  if(u==="un"){const v=Math.round(q*2)/2;return (v<0.5?"½":String(v).replace(".5","½").replace(/^0½/,"½"))+" un"}
+  if(u==="dente"){const v=Math.ceil(q);return v+(v===1?" dente":" dentes")}
+  return q+" "+u;
+}
+
+/* ---------- Render ---------- */
+const $=s=>document.querySelector(s);
+function renderAll(){renderFamResumo();renderPlano();renderCompras();renderReceitas();renderFamilia()}
+
+function renderFamResumo(){
+  const a=S.fam.adultos,c=S.fam.criancas;
+  $("#famResumo").textContent = a+" adulto"+(a!==1?"s":"")+(c.length?" e "+c.length+" criança"+(c.length>1?"s":"")+" ("+c.join(" e ")+" anos)":"");
+}
+function chip(t){return `<span class="chip t-${t}">${TIPOS[t]}</span>`}
+
+function renderPlano(){
+  $("#inicio").value=S.start;
+  const cont={};S.plan.forEach(s=>{const t=byId[s.r].t;cont[t]=(cont[t]||0)+1});
+  $("#resumoTipos").innerHTML=Object.keys(TIPOS).map(t=>`<span class="chip t-${t}">${TIPOS[t]} · ${cont[t]||0}×</span>`).join("")+`<span class="chip" style="background:var(--plum-soft);color:var(--plum)">Orçamento ≈ ${Math.round(orcamento().total)} €/semana</span>`;
+  let h="";
+  for(let d=0;d<7;d++){
+    h+=`<div class="day"><h3>${DIAS[d]} <span>${dayDate(d)}</span></h3>`;
+    ["Almoço","Jantar"].forEach((w,k)=>{
+      const i=d*2+k,s=S.plan[i],r=byId[s.r];
+      const side=(S.sideKids&&S.fam.criancas.length&&!r.semSide)?` · crianças: ${SIDES[s.side].n.toLowerCase()}`:"";
+      h+=`<div class="meal"><div class="when">${w}</div><div class="mbody" data-open="${i}"><div class="mname">${r.n}</div><div class="mmeta">${chip(r.t)}${r.min} min${side} · fruta: ${frutaDo(i).n.toLowerCase()}</div></div><button class="swap" data-swap="${i}" title="Trocar receita">⇄</button></div>`;
+    });
+    h+=`</div>`;
+  }
+  $("#dias").innerHTML=h;
+}
+
+function listaAgregada(){
+  const f=porcoes(),nK=S.fam.criancas.length,nP=S.fam.adultos+nK,m={};
+  const add=(n,q,u,cat)=>{const k=(cat==="snack"?"s:":"")+n+"|"+(u||"qb");if(!m[k])m[k]={k,n,u:u||"qb",q:0,cat:cat||CAT_OF[n]||"leg"};m[k].q+=q||0};
+  S.plan.forEach((s,i)=>{
+    const r=byId[s.r];
+    r.i.forEach(([n,q,u])=>add(n,q?q*(u==="dente"?Math.max(1,f/2):f):0,q?u:null));
+    if(S.sideKids&&nK&&!r.semSide){const sd=SIDES[s.side];add(sd.n,sd.q*nK,sd.u)}
+    const fr=frutaDo(i);add(fr.n,fr.g*nP,"g","fruta");
+  });
+  if(S.snacks){const sc=nP/4;SNACKS.forEach(([n,q,u])=>add(n,q*sc,u,"snack"))}
+  const g={};Object.values(m).forEach(it=>{it.eur=custo(it.n,it.q,it.u);(g[it.cat]=g[it.cat]||[]).push(it)});
+  return Object.keys(CATS).filter(c=>g[c]).map(c=>({c,items:g[c].sort((a,b)=>(a.u==="qb")-(b.u==="qb")||a.n.localeCompare(b.n,"pt")),tot:g[c].reduce((a,x)=>a+x.eur,0)}));
+}
+function orcamento(L){L=L||listaAgregada();const snack=L.filter(x=>x.c==="snack").reduce((a,x)=>a+x.tot,0),fruta=L.filter(x=>x.c==="fruta").reduce((a,x)=>a+x.tot,0),total=L.reduce((a,x)=>a+x.tot,0)+ERVAS_EUR;return {total,snack,fruta,refeicoes:total-snack-fruta-ERVAS_EUR}}
+function qtdTxt(it){let t=fmtQ(it.q,it.u);const fr=FRUTA.find(f=>f.n===it.n);if(fr&&fr.pw)t+=` (≈${Math.ceil(roundQ(it.q,"g")/fr.pw)} un)`;return t}
+function renderCompras(){
+  $("#semanaCompras").textContent=dayDate(0)+" a "+dayDate(6);
+  const L=listaAgregada(),o=orcamento(L);
+  $("#orc").innerHTML=`<div class="big">≈ ${Math.round(o.total)} €</div><div class="muted" style="margin-bottom:8px">por semana · intervalo provável ${Math.round(o.total*0.9)}–${Math.round(o.total*1.15)} €</div>
+   <div class="orow"><span>Almoços e jantares</span><b>${eur(o.refeicoes)}</b></div>
+   <div class="orow"><span>Fruta para sobremesa</span><b>${eur(o.fruta)}</b></div>
+   <div class="orow"><span>Snacks e lanches</span><b>${S.snacks?eur(o.snack):"—"}</b></div>
+   <div class="orow"><span>Ervas, especiarias e sal (reposição)</span><b>${eur(ERVAS_EUR)}</b></div>
+   <div class="muted" style="margin-top:8px">Estimativa com preços de referência do Lidl/Algarve (novembro 2026). Varia com promoções, tamanho das embalagens e preço do peixe no mercado — ajusta os preços em "Editar preços" e o total atualiza.</div>`;
+  $("#snacksOn").checked=S.snacks;
+  $("#editP").textContent=S.editP?"Concluir edição":"Editar preços";
+  $("#lista").innerHTML=L.map(({c,items,tot})=>`<div class="cat"><h4>${CATS[c]} <span style="text-transform:none;letter-spacing:0;color:var(--muted);font-weight:500">· ${STORE[c]||"Lidl"} · ${eur(tot)}</span></h4>${items.map(it=>{const on=S.checks[it.k];
+    const pr=it.u==="qb"?"":(S.editP?`<input type="number" step="0.05" min="0" value="${preco(it.n)??""}" data-preco="${it.n}" class="pin"><span class="muted"> ${base(it.u)}</span>`:`<small>${eur(it.eur)}</small>`);
+    return `<label class="item${on?" done":""}"><input type="checkbox" data-chk="${it.k}" ${on?"checked":""}><span class="iname">${it.n}</span><span class="iq">${qtdTxt(it)}<br>${pr}</span></label>`}).join("")}</div>`).join("");
+}
+function textoLista(){
+  let t=`Lista de compras · ${dayDate(0)} a ${dayDate(6)}\n`;
+  const L=listaAgregada();L.forEach(({c,items})=>{t+=`\n${CATS[c].toUpperCase()} (${STORE[c]||"Lidl"})\n`;items.forEach(it=>t+=`☐ ${it.n} — ${qtdTxt(it)}\n`)});
+  return t+`\nOrçamento estimado: ≈ ${Math.round(orcamento(L).total)} €\n`;
+}
+
+function renderReceitas(){
+  $("#todas").innerHTML=Object.keys(TIPOS).map(t=>R.filter(r=>r.t===t).map(r=>`<div class="r" data-rec="${r.id}"><div><div class="mname">${r.n}</div><div class="mmeta">${chip(r.t)}${r.min} min</div></div><div class="muted">›</div></div>`).join("")).join("");
+}
+
+function abrirReceita(id,slot){
+  const r=byId[id],f=porcoes(),nK=S.fam.criancas.length;
+  let h=`<button class="close" data-close>×</button>${chip(r.t)}<span class="muted">${r.min} min</span><h2>${r.n}</h2>`;
+  if(slot!=null) h+=`<div class="muted">${DIAS[Math.floor(slot/2)]}, ${slot%2?"jantar":"almoço"} · ${dayDate(Math.floor(slot/2))}</div>`;
+  h+=`<h5>Ingredientes · para ${String(Math.round(f*10)/10).replace(".",",")} porções</h5><ul>`;
+  r.i.forEach(([n,q,u])=>h+=`<li><span>${n}</span><b>${fmtRecipe(q?q*(u==="dente"?Math.max(1,f/2):f):0,u)}</b></li>`);
+  h+=`<li><span>Sal e pimenta</span><b>q.b.</b></li></ul><h5>Preparação</h5><ol>${r.p.map(x=>`<li>${x}</li>`).join("")}</ol>`;
+  if(slot!=null&&S.sideKids&&nK&&!r.semSide) h+=`<div class="note"><b>Para as crianças:</b> acompanhar com ${SIDES[S.plan[slot].side].d}.</div>`;
+  if(slot!=null) h+=`<div class="note" style="background:var(--plum-soft)"><b>Sobremesa:</b> ${frutaDo(slot).n.toLowerCase()} — uma porção por pessoa.</div>`;
+  if(r.nota) h+=`<div class="note">${r.nota}</div>`;
+  if(EQUIP[r.id]) h+=`<div class="note" style="background:var(--sea-soft)"><b>Com os teus equipamentos:</b> ${EQUIP[r.id]}</div>`;
+  if(slot!=null){
+    h+=`<h5>Trocar esta refeição</h5><select class="pick" data-pick="${slot}"><option value="">Escolher outra receita…</option>${Object.keys(TIPOS).map(t=>`<optgroup label="${TIPOS[t]}">${R.filter(x=>x.t===t).map(x=>`<option value="${x.id}" ${x.id===id?"disabled":""}>${x.n}</option>`).join("")}</optgroup>`).join("")}</select>`;
+  }
+  $("#sheet").innerHTML=h;$("#ov").classList.add("on");$("#sheet").scrollTop=0;
+}
+
+function renderFamilia(){
+  $("#adultos").value=S.fam.adultos;
+  $("#criancas").innerHTML=S.fam.criancas.map((a,i)=>`<div class="fam-row"><div class="grow">Criança ${i+1}</div><input type="number" min="1" max="17" value="${a}" data-idade="${i}" style="width:70px"><span class="muted">anos</span><button class="btn small" data-rm="${i}">Remover</button></div>`).join("");
+  $("#sideKids").checked=S.sideKids;
+  $("#porcoes").textContent=`Equivale a ${String(Math.round(porcoes()*10)/10).replace(".",",")} porções de adulto por refeição (crianças até 8 anos ≈ 0,6; 9–12 anos ≈ 0,8; 13+ = porção de adulto).`;
+}
+
+/* ---------- Eventos ---------- */
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x===b));
+  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("on",v.id==="v-"+b.dataset.v));
+  window.scrollTo(0,0);
+});
+$("#gerar").onclick=()=>{S.plan=gerarPlano();S.fruitOff=Math.floor(Math.random()*8);S.checks={};save();renderAll();toast("Novo plano gerado")};
+$("#inicio").onchange=e=>{if(e.target.value){const [y,m,d]=e.target.value.split("-").map(Number);const dt=new Date(y,m-1,d);if(dt.getDay()!==1){dt.setDate(dt.getDate()-((dt.getDay()+6)%7));toast("Ajustado para segunda-feira")}S.start=iso(dt);save();renderAll()}};
+document.body.addEventListener("click",e=>{
+  const t=e.target;
+  if(t.dataset.swap!=null){trocar(+t.dataset.swap);toast("Receita trocada");return}
+  const o=t.closest("[data-open]");if(o){const i=+o.dataset.open;abrirReceita(S.plan[i].r,i);return}
+  const rc=t.closest("[data-rec]");if(rc){abrirReceita(rc.dataset.rec,null);return}
+  if(t.dataset.close!=null||t.id==="ov"){$("#ov").classList.remove("on");return}
+  if(t.dataset.rm!=null){S.fam.criancas.splice(+t.dataset.rm,1);save();renderAll()}
+});
+document.body.addEventListener("change",e=>{
+  const t=e.target;
+  if(t.dataset.chk){S.checks[t.dataset.chk]=t.checked;t.closest(".item").classList.toggle("done",t.checked);save()}
+  if(t.dataset.pick&&t.value){const i=+t.dataset.pick,usado=S.plan.findIndex((s,j)=>s.r===t.value&&j!==i);
+    if(usado>=0){S.plan[usado].r=S.plan[i].r;toast("Trocada com "+DIAS[Math.floor(usado/2)].toLowerCase())}
+    S.plan[i].r=t.value;S.checks={};save();renderAll();abrirReceita(t.value,i)}
+  if(t.dataset.preco){const v=parseFloat(String(t.value).replace(",","."));if(isNaN(v))delete S.precos[t.dataset.preco];else S.precos[t.dataset.preco]=v;save();renderCompras();renderPlano()}
+  if(t.dataset.idade!=null){S.fam.criancas[+t.dataset.idade]=Math.max(1,Math.min(17,+t.value||1));save();renderAll()}
+});
+$("#adultos").onchange=e=>{S.fam.adultos=Math.max(0,Math.min(10,+e.target.value||0));save();renderAll()};
+$("#addCrianca").onclick=()=>{S.fam.criancas.push(6);save();renderAll()};
+$("#sideKids").onchange=e=>{S.sideKids=e.target.checked;save();renderAll()};
+$("#snacksOn").onchange=e=>{S.snacks=e.target.checked;save();renderAll()};
+$("#editP").onclick=()=>{S.editP=!S.editP;renderCompras()};
+$("#limparChecks").onclick=()=>{S.checks={};save();renderCompras()};
+$("#copiar").onclick=async()=>{
+  const txt=textoLista();
+  try{await navigator.clipboard.writeText(txt);toast("Lista copiada")}
+  catch(err){const ta=$("#txtLista");ta.value=txt;ta.style.display="block";ta.focus();ta.select();toast("Seleciona e copia o texto")}
+};
+
+/* ---------- PDF ---------- */
+function gerarPDF(){
+  const {jsPDF}=window.jspdf; const doc=new jsPDF({unit:"mm",format:"a4"});
+  const L=listaAgregada(),o=orcamento(L),W=210,M=15; let y=18;
+  const OL=[93,107,53],MU=[119,115,106],LN=[230,223,207];
+  const fam=document.getElementById("famResumo").textContent;
+  const novaPag=()=>{doc.addPage();y=18};
+  const need=h=>{if(y+h>282)novaPag()};
+  const e2=v=>v.toFixed(2).replace(".",",")+" €";
+  doc.setFont("helvetica","bold");doc.setFontSize(19);doc.setTextColor(...OL);doc.text("Lista de compras",M,y);y+=6;
+  doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(...MU);
+  doc.text(`Semana de ${dayDate(0)} a ${dayDate(6)} · ${fam}`,M,y);y+=6;
+  doc.setFillColor(244,240,228);doc.rect(M,y,W-2*M,15,"F");
+  doc.setFont("helvetica","bold");doc.setTextColor(43,42,38);doc.setFontSize(10.5);
+  doc.text(`Orçamento estimado: ~${Math.round(o.total)} € (entre ${Math.round(o.total*.9)} e ${Math.round(o.total*1.15)} €)`,M+3,y+6);
+  doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(...MU);
+  doc.text(`Almoços e jantares ${e2(o.refeicoes)} · Fruta ${e2(o.fruta)} · Snacks ${S.snacks?e2(o.snack):"—"} · Ervas e especiarias ${e2(ERVAS_EUR)}`,M+3,y+11.5);
+  y+=21;
+  L.forEach(({c,items,tot})=>{
+    need(14);
+    doc.setFont("helvetica","bold");doc.setFontSize(10);doc.setTextColor(...OL);
+    const h=CATS[c].toUpperCase();doc.text(h,M,y);const hw=doc.getTextWidth(h);
+    doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(...MU);
+    doc.text(`  ${STORE[c]||"Lidl"} · ${e2(tot)}`,M+hw,y);
+    y+=5;
+    items.forEach(it=>{
+      need(6.5);
+      doc.setDrawColor(...OL);doc.setLineWidth(.3);doc.rect(M+.5,y-3.2,3.6,3.6);
+      doc.setFontSize(9.5);doc.setTextColor(43,42,38);doc.setFont("helvetica","normal");
+      doc.text(doc.splitTextToSize(it.n,100)[0],M+7,y);
+      doc.setFont("helvetica","bold");doc.text(qtdTxt(it).replace("≈","~"),M+110,y);
+      doc.setFont("helvetica","normal");doc.setTextColor(...MU);doc.setFontSize(8.5);
+      if(it.u!=="qb") doc.text(e2(it.eur),W-M,y,{align:"right"});
+      doc.setDrawColor(...LN);doc.line(M,y+1.8,W-M,y+1.8);
+      y+=6.3;
+    });
+    y+=3;
+  });
+  need(12);doc.setFontSize(8);doc.setTextColor(...MU);
+  doc.text(doc.splitTextToSize('Confirmar rótulos "sem glúten": carne picada, especiarias, tomate pelado, bebida de aveia, tostas e húmus. Itens "q.b." costumam existir em casa. Preços estimados.',W-2*M),M,y);
+  // Menu
+  novaPag();
+  doc.setFont("helvetica","bold");doc.setFontSize(19);doc.setTextColor(...OL);doc.text("Menu da semana",M,y);y+=6;
+  doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(...MU);doc.text(`${dayDate(0)} a ${dayDate(6)} · fruta da época como sobremesa`,M,y);y+=8;
+  const cx=[M,M+26,M+104],cw=[24,76,76];
+  doc.setFillColor(244,240,228);doc.rect(M,y-4.5,W-2*M,7,"F");
+  doc.setFont("helvetica","bold");doc.setFontSize(9.5);doc.setTextColor(43,42,38);
+  ["Dia","Almoço","Jantar"].forEach((t,k)=>doc.text(t,cx[k]+1,y));y+=7;
+  for(let d=0;d<7;d++){
+    const cells=[0,1].map(k=>{const i=d*2+k,s=S.plan[i],r=byId[s.r];
+      const sub="Fruta: "+frutaDo(i).n.toLowerCase()+((S.sideKids&&S.fam.criancas.length&&!r.semSide)?" · crianças: "+SIDES[s.side].n.toLowerCase():"");
+      return {t:doc.splitTextToSize(r.n,cw[1]-2),s:doc.splitTextToSize(sub,cw[1]-2)}});
+    const h=Math.max(...cells.map(c=>c.t.length*4.3+c.s.length*3.6))+4;
+    need(h);
+    doc.setFont("helvetica","bold");doc.setFontSize(9.5);doc.setTextColor(43,42,38);doc.text(DIAS[d],cx[0]+1,y);
+    doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(...MU);doc.text(dayDate(d),cx[0]+1,y+4);
+    cells.forEach((c,k)=>{doc.setFontSize(9.5);doc.setTextColor(43,42,38);doc.text(c.t,cx[k+1]+1,y);
+      doc.setFontSize(8);doc.setTextColor(...MU);doc.text(c.s,cx[k+1]+1,y+c.t.length*4.3);});
+    doc.setDrawColor(...LN);doc.line(M,y+h-3.5,W-M,y+h-3.5);y+=h;
+  }
+  return doc;
+}
+async function partilharPDF(){
+  if(!window.jspdf){toast("PDF indisponível");return}
+  const doc=gerarPDF(), nome=`Lista_compras_${S.start}.pdf`, blob=doc.output("blob");
+  const file=new File([blob],nome,{type:"application/pdf"});
+  try{
+    if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"Lista de compras"});return}
+  }catch(e){if(e&&e.name==="AbortError")return}
+  const url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=nome;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);
+  toast("PDF descarregado");
+}
+$("#pdfBtn").onclick=partilharPDF;
+let tt;function toast(m){const el=$("#toast");el.textContent=m;el.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>el.classList.remove("on"),1800)}
+
+save();renderAll();
+</script>
+<script src="jspdf.umd.min.js"></script>
+<script>if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});</script>
+</body>
+</html>

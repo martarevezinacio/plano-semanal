@@ -1,0 +1,15 @@
+{
+  "name": "Plano Semanal Mediterrânico",
+  "short_name": "Plano Semanal",
+  "description": "Menu semanal mediterrânico, receitas e lista de compras da família.",
+  "lang": "pt-PT",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f7f3ea",
+  "theme_color": "#5d6b35",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}
